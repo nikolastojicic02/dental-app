@@ -1,0 +1,12 @@
+fastapi
+uvicorn
+python-multipart
+torch
+torchvision
+trimesh
+numpy-stl
+numpy
+scipy
+scikit-learn
+open3d
+plotly
