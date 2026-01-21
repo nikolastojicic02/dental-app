@@ -4,6 +4,8 @@
 
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 import shutil
 import os
 import uuid
@@ -1027,7 +1029,23 @@ async def cleanup_session(session_id: str):
 
 
 
+# ============================================================================
+# SERVIRANJE FRONTA 
+# ============================================================================
+# Putanja do "dist" foldera (gde React napravi build)
+# U Dockeru će struktura biti takva da je frontend folder pored backend foldera
+frontend_dist_path = os.path.join(os.getcwd(), "..", "frontend", "dist")
 
+# Ako folder postoji (na serveru), montiraj ga
+if os.path.exists(frontend_dist_path):
+    app.mount("/", StaticFiles(directory=frontend_dist_path, html=True), name="static")
+
+    # Catch-all ruta za React Router (ako koristiš stranice na frontu)
+    @app.get("/{full_path:path}")
+    async def serve_react_app(full_path: str):
+        # Ako ruta ne počinje sa "stage" ili "cleanup" (tvoj API), pošalji index.html
+        if not full_path.startswith(("stage", "cleanup", "docs", "redoc", "openapi.json")):
+            return FileResponse(os.path.join(frontend_dist_path, "index.html"))
 
 
 
